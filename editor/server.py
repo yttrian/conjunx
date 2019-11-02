@@ -2,34 +2,87 @@ from os import path, makedirs, getenv
 import time
 
 from aiohttp import web
-from aiohttp_session import redis_storage, setup, get_session
+from aiohttp_session import redis_storage, setup, new_session, get_session
 from aioredis import create_pool
+
+from cjxproject import CJXProject
 
 spool = '/var/spool/conjunx'
 
 routes = web.RouteTableDef()
+projects = {}
+
 
 # The user facing editor
 
 @routes.get('/')
-async def hello(request):
-    await get_session(request)
+async def editor(request):
+    session = await get_session(request)
 
-    return web.Response(text="Hello, world")
+    if session.identity is None:
+        session = await new_session(request)
+
+    session['last_visited'] = time.time()
+
+    project = get_project(session)
+
+    return web.Response(text=f"Hello, {session.identity}")
+
+
+def get_project(session):
+    sid = session.identity
+    if sid not in projects:
+        projects[sid] = CJXProject()
+    
+    return projects[sid]
+
 
 # Clip/transcript related endpoints
 
-@routes.post('/clip/')
+@routes.get('/clip')
+async def get_clips_list(request):
+    session = await get_session(request)
+    project = get_project(session)
+
+    return web.json_response(project.get_clips_list())
+
+
+@routes.post('/clip')
 async def upload_clip(request):
-    return web.HTTPNotImplemented()
+    reader = await request.multipart()
+
+    session = await get_session(request)
+    project = get_project(session)
+
+    field = await reader.next()
+    assert field.name == 'data'
+
+    clip_id = await project.add_clip(field)
+
+    return web.HTTPOk(text=clip_id)
+
 
 @routes.delete('/clip/{id}')
 async def delete_clip(request):
+    session = await get_session(request)
+    project = get_project(session)
+
+    clip_id = request.match_info['id']
+    if project.delete_clip(clip_id):
+        return web.HTTPOk()
+
+    return web.HTTPNotFound()
+
+
+@routes.get('/clip/{id}/transcript')
+async def get_transcript(request):
     return web.HTTPNotImplemented()
+
 
 @routes.patch('/clip/{id}/transcript')
 async def update_transcript(request):
     return web.HTTPNotImplemented()
+
 
 # .cjxa archive related endpoints
 
@@ -37,15 +90,18 @@ async def update_transcript(request):
 async def download_archive(request):
     return web.HTTPNotImplemented()
 
+
 @routes.put('/archive')
 async def upload_archive(request):
     return web.HTTPNotImplemented()
+
 
 # Render related endpoints
 
 @routes.get('/render')
 async def render(request):
     return web.HTTPNotImplemented()
+
 
 # Gunicorn app builder
 

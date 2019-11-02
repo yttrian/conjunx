@@ -10,7 +10,7 @@ Made during the 24 hour [UB Hacking](https://www.ubhacking.com/) 2019 Hackathon
 2. A request is made to the render server with the .cjx and a desired dictation to be created
 3. The render server sends back the processed video file
 
-## .cjxc caption file description
+## .cjxt transcript file description
 
 The first line of a caption file is the name of the video it refers to. 
 All the following lines are a word/phrase, a starting timestamp, and an ending timestamp (in second + milliseconds)
