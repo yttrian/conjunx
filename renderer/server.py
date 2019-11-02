@@ -34,6 +34,8 @@ async def render(request):
                 break
             f.write(chunk)
 
+    return web.HTTPOk()
+
 async def run():
     app = web.Application()
     app.add_routes(routes)
