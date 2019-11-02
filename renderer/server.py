@@ -1,4 +1,4 @@
-from os import path, mkdir
+from os import path, makedirs
 import time
 
 from aiohttp import web
@@ -9,7 +9,7 @@ routes = web.RouteTableDef()
 
 @routes.get('/')
 async def hello(request):
-    return web.Response(text="Hello, world")
+    return web.Response(text="conjunx render server")
 
 @routes.post('/render')
 async def render(request):
@@ -40,6 +40,6 @@ async def run():
     app = web.Application()
     app.add_routes(routes)
 
-    mkdir(spool)
+    makedirs(spool, exist_ok=True)
 
     return app
