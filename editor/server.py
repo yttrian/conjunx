@@ -1,10 +1,10 @@
-from os import path, makedirs, getenv
+import shutil
 import time
+from os import makedirs, getenv
 
 from aiohttp import web
 from aiohttp_session import redis_storage, setup, new_session, get_session
 from aioredis import create_pool
-
 from cjxproject import CJXProject
 
 spool = '/var/spool/conjunx'
@@ -33,7 +33,7 @@ def get_project(session):
     sid = session.identity
     if sid not in projects:
         projects[sid] = CJXProject()
-    
+
     return projects[sid]
 
 
@@ -49,17 +49,17 @@ async def get_clips_list(request):
 
 @routes.post('/clip')
 async def upload_clip(request):
-    reader = await request.multipart()
-
     session = await get_session(request)
     project = get_project(session)
+
+    reader = await request.multipart()
 
     field = await reader.next()
     assert field.name == 'data'
 
     clip_id = await project.add_clip(field)
 
-    return web.HTTPOk(text=clip_id)
+    return web.Response(text=clip_id)
 
 
 @routes.delete('/clip/{id}')
@@ -76,10 +76,19 @@ async def delete_clip(request):
 
 @routes.get('/clip/{id}/transcript')
 async def get_transcript(request):
-    return web.HTTPNotImplemented()
+    session = await get_session(request)
+    project = get_project(session)
+
+    clip_id = request.match_info['id']
+    transcript = project.get_transcript(clip_id)
+
+    if transcript is None:
+        return web.HTTPNotFound()
+
+    return web.Response(text=transcript)
 
 
-@routes.patch('/clip/{id}/transcript')
+@routes.put('/clip/{id}/transcript')
 async def update_transcript(request):
     return web.HTTPNotImplemented()
 
@@ -88,12 +97,25 @@ async def update_transcript(request):
 
 @routes.get('/archive')
 async def download_archive(request):
-    return web.HTTPNotImplemented()
+    session = await get_session(request)
+    project = get_project(session)
+
+    return web.FileResponse(project.create_archive())
 
 
 @routes.put('/archive')
 async def upload_archive(request):
-    return web.HTTPNotImplemented()
+    session = await get_session(request)
+    project = get_project(session)
+
+    reader = await request.multipart()
+
+    field = await reader.next()
+    assert field.name == 'data'
+
+    await project.load_archive(field)
+
+    return web.HTTPOk()
 
 
 # Render related endpoints
@@ -113,6 +135,7 @@ async def run():
     storage = redis_storage.RedisStorage(redis)
     setup(app, storage)
 
-    makedirs(spool, exist_ok=True)
+    shutil.rmtree(spool, ignore_errors=True)
+    makedirs(spool)
 
     return app

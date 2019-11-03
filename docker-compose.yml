@@ -1,14 +1,14 @@
 version: '3'
 
-services: 
+services:
   render-server:
     build: ./renderer
   editor-client:
     build: ./editor
     ports:
-    - 8080:80
-    environment: 
-    - redis=sessions
-    - renderer=render-server
+      - 8080:80
+    environment:
+      - redis=sessions
+      - renderer=render-server
   sessions:
     image: redis:5-alpine

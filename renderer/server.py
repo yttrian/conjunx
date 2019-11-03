@@ -1,5 +1,6 @@
-from os import path, makedirs
+import shutil
 import time
+from os import path, makedirs
 
 from aiohttp import web
 
@@ -7,9 +8,11 @@ spool = '/var/spool/conjunx'
 
 routes = web.RouteTableDef()
 
+
 @routes.get('/')
 async def hello(request):
     return web.Response(text="conjunx render server")
+
 
 @routes.post('/render')
 async def render(request):
@@ -36,10 +39,12 @@ async def render(request):
 
     return web.HTTPOk()
 
+
 async def run():
     app = web.Application()
     app.add_routes(routes)
 
-    makedirs(spool, exist_ok=True)
+    shutil.rmtree(spool, ignore_errors=True)
+    makedirs(spool)
 
     return app
