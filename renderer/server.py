@@ -41,27 +41,13 @@ async def render(request):
                 break
             f.write(chunk)
 
-    job = RenderJob(archive_loc, dictate)
+    try:
+        job = RenderJob(archive_loc, dictate)
+        movie = job.render()
 
-    return web.FileResponse(job.render())
-
-
-@routes.post('/transcript-test')
-async def transcript_test(request):
-    data = await request.post()
-
-    transcript_loc = path.join(spool, str(time.time_ns()) + '.cjxt')
-
-    with open(transcript_loc, 'w') as f:
-        f.write(data['transcript'])
-
-    t = Transcript(transcript_loc)
-    c = Collection()
-
-    c.add_transcript(t)
-    d = c.speak(data['dictate'])
-
-    return web.Response(text=str([str(v) for v in d]))
+        return web.FileResponse(movie)
+    except IndexError:
+        return web.HTTPBadRequest(text="Needed words not available!")
 
 
 async def run():

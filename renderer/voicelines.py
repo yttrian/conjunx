@@ -1,6 +1,7 @@
 import csv
 import datetime
 import itertools
+import random
 from typing import Dict, List, Tuple
 
 
@@ -80,7 +81,7 @@ class Collection:
         :param dictate: what to try to say
         :return: the list of voice lines to used in video editing
         """
-        words = dictate.split(" ")
+        words = dictate.lower().split(" ")
         lines = []
 
         def choose_best_voice_line(remaining_text: List[str], voice_lines: List[VoiceLine]) -> VoiceLine:
@@ -102,7 +103,7 @@ class Collection:
                 elif voice_line_group is None:
                     return growing_search(start, end + 1)
                 else:
-                    return voice_line_group[0], end
+                    return random.choice(voice_line_group), end
 
             line, end = growing_search(i, i + 1)
             lines.append(line)
