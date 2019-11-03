@@ -2,6 +2,7 @@ import shutil
 import time
 from os import makedirs, getenv
 
+import aiohttp
 from aiohttp import web
 from aiohttp_session import redis_storage, setup, new_session, get_session
 from aioredis import create_pool
@@ -23,10 +24,9 @@ async def editor(request):
         session = await new_session(request)
 
     session['last_visited'] = time.time()
+    get_project(session)
 
-    project = get_project(session)
-
-    return web.Response(text=f"Hello, {session.identity}")
+    return web.FileResponse('./static/fallback.html')
 
 
 def get_project(session):
@@ -74,6 +74,21 @@ async def delete_clip(request):
     return web.HTTPNotFound()
 
 
+@routes.get('/clip/{id}')
+async def get_clip(request):
+    session = await get_session(request)
+    project = get_project(session)
+
+    clip_id = request.match_info['id']
+    clip = project.get_clip(clip_id)
+
+    if clip is not None:
+        headers = {'Content-Type': 'video/mp4'}
+        return web.FileResponse(clip, headers=headers)
+
+    return web.HTTPNotFound()
+
+
 @routes.get('/clip/{id}/transcript')
 async def get_transcript(request):
     session = await get_session(request)
@@ -103,7 +118,7 @@ async def download_archive(request):
     return web.FileResponse(project.create_archive())
 
 
-@routes.put('/archive')
+@routes.post('/archive')  # was put but fallback.html wants post
 async def upload_archive(request):
     session = await get_session(request)
     project = get_project(session)
@@ -120,15 +135,22 @@ async def upload_archive(request):
 
 # Render related endpoints
 
-@routes.get('/render')
+@routes.post('/render')
 async def render(request):
-    return web.HTTPNotImplemented()
+    session = await get_session(request)
+    project = get_project(session)
+
+    data = await request.post()
+    dictate = data['dictate']
+
+    return web.FileResponse(await project.render(dictate))
 
 
 # Gunicorn app builder
 
 async def run():
     app = web.Application()
+    routes.static('/', './static')
     app.add_routes(routes)
 
     redis = await create_pool((getenv('redis'), 6379))

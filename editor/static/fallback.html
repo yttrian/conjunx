@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha256-YLGeXaapI0/5IgZopewRJcFXomhRMlYYjugPLSyNjTY=" crossorigin="anonymous"/>
+
+    <title>conjunx manual submission tool</title>
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark">
+    <span class="navbar-brand mb-0 h1">conjunx manual submission tool</span>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Step 1. Create .cjxa file</h2>
+            <p>Check out the <a href="https://github.com/yttrian/conjunx/blob/master/README.md">README</a></p>
+        </div>
+        <div class="col-md-4">
+            <h2>Step 2. Upload the .cjxa file</h2>
+            <form action="./archive" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="archive">Project file</label>
+                    <input id="archive" class="form-control" type="file" accept=".cjxa" name="data" required/>
+                </div>
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <h2>Step 3. Create a dictation</h2>
+            <form action="./render" method="post">
+                <div class="form-group">
+                    <label for="dictation">Dictation</label>
+                    <input id="dictation" class="form-control" type="text" placeholder="" name="dictate" required/>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

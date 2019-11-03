@@ -1,8 +1,10 @@
 import shutil
 import time
 import uuid
-from os import path, makedirs, remove, listdir
+from os import path, makedirs, remove, listdir, getenv
 from zipfile import ZipFile, ZIP_STORED
+
+import aiohttp
 
 spool = '/var/spool/conjunx'
 
@@ -81,6 +83,15 @@ class CJXProject:
         """
         return {clip_id: c.name for (clip_id, c) in zip(self.clips.keys(), self.clips.values())}
 
+    def get_clip(self, clip_id):
+        """
+        :return: the requested clip or None if it doesn't exist
+        """
+        if clip_id not in self.clips:
+            return None
+
+        return self.clips[clip_id].video_loc
+
     def delete_clip(self, clip_id):
         """
         Deletes the requested clip and associated transcript.
@@ -106,6 +117,29 @@ class CJXProject:
         clip = self.clips[clip_id]
 
         return clip.get_transcript()
+
+    async def render(self, dictate):
+        """
+        Submit project to render server
+        :return: the downloaded response
+        """
+        archive = self.create_archive()
+
+        movie_loc = path.join(spool, self.id + '.mp4')
+
+        # https://aiohttp.readthedocs.io/en/stable/client_quickstart.html#make-a-request
+        async with aiohttp.ClientSession() as session:
+            data = {'dictate': dictate, 'data': open(archive, 'rb')}
+            async with session.post(f'http://{getenv("renderer")}/render', data=data) as resp:
+                # https://aiohttp.readthedocs.io/en/stable/client_quickstart.html#streaming-response-content
+                with open(movie_loc, 'wb') as fd:
+                    while True:
+                        chunk = await resp.content.read(100)
+                        if not chunk:
+                            break
+                        fd.write(chunk)
+
+        return movie_loc
 
 
 class Clip:
