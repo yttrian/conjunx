@@ -139,7 +139,7 @@ class CJXProject:
                             break
                         fd.write(chunk)
 
-        return movie_loc
+                    return movie_loc
 
 
 class Clip:

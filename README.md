@@ -6,7 +6,7 @@ Made during the 24 hour [UB Hacking](https://www.ubhacking.com/) 2019 Hackathon
 ## How it works
 
 1. A .cjxa file is created using a conjunx compatible editor
- - These files are compressed archives containing both source video files and transcripts
+ - These files are archives containing both source video files and transcripts
 2. A request is made to the render server with the .cjx and a desired dictation to be created
 3. The render server sends back the processed video file
 

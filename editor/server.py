@@ -143,7 +143,9 @@ async def render(request):
     data = await request.post()
     dictate = data['dictate']
 
-    return web.FileResponse(await project.render(dictate))
+    headers = {'Content-Disposition': 'Attachment'}
+
+    return web.FileResponse(await project.render(dictate), headers=headers)
 
 
 # Gunicorn app builder
