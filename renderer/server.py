@@ -4,6 +4,8 @@ from os import path, makedirs
 
 from aiohttp import web
 
+from voicelines import Transcript, Collection
+
 spool = '/var/spool/conjunx'
 
 routes = web.RouteTableDef()
@@ -38,6 +40,24 @@ async def render(request):
             f.write(chunk)
 
     return web.HTTPOk()
+
+
+@routes.post('/transcript-test')
+async def transcript_test(request):
+    data = await request.post()
+
+    transcript_loc = path.join(spool, str(time.time_ns()) + '.cjxt')
+
+    with open(transcript_loc, 'w') as f:
+        f.write(data['transcript'])
+
+    t = Transcript(transcript_loc)
+    c = Collection()
+
+    c.add_transcript(t)
+    d = c.speak(data['dictate'])
+
+    return web.Response(text=str(d))
 
 
 async def run():

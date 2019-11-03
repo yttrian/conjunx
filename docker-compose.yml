@@ -3,6 +3,8 @@ version: '3'
 services:
   render-server:
     build: ./renderer
+    ports:
+      - 8081:80
   editor-client:
     build: ./editor
     ports:
