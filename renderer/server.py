@@ -5,7 +5,6 @@ from os import path, makedirs
 from aiohttp import web
 
 from render import RenderJob
-from voicelines import Transcript, Collection
 
 spool = '/var/spool/conjunx'
 

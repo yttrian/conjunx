@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha256-YLGeXaapI0/5IgZopewRJcFXomhRMlYYjugPLSyNjTY=" crossorigin="anonymous"/>
+    <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha256-YLGeXaapI0/5IgZopewRJcFXomhRMlYYjugPLSyNjTY=" rel="stylesheet"/>
 
     <title>conjunx manual submission tool</title>
 </head>
@@ -22,12 +22,12 @@
         </div>
         <div class="col-md-4">
             <h2>Step 2. Upload the .cjxa file</h2>
-            <form action="./archive" method="post" enctype="multipart/form-data">
+            <form action="./archive" enctype="multipart/form-data" method="post">
                 <div class="form-group">
                     <label for="archive">Project file</label>
-                    <input id="archive" class="form-control" type="file" accept=".cjxa" name="data" required/>
+                    <input accept=".cjxa" class="form-control" id="archive" name="data" required type="file"/>
                 </div>
-                <button type="submit" class="btn btn-primary">Upload</button>
+                <button class="btn btn-primary" type="submit">Upload</button>
             </form>
         </div>
         <div class="col-md-4">
@@ -35,9 +35,9 @@
             <form action="./render" method="post">
                 <div class="form-group">
                     <label for="dictation">Dictation</label>
-                    <input id="dictation" class="form-control" type="text" placeholder="" name="dictate" required/>
+                    <input class="form-control" id="dictation" name="dictate" placeholder="" required type="text"/>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button class="btn btn-primary" type="submit">Submit</button>
             </form>
         </div>
     </div>

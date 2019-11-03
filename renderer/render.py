@@ -1,6 +1,5 @@
 import time
 from os import path, listdir
-from typing import List
 from zipfile import ZipFile
 
 from moviepy.editor import VideoFileClip, concatenate_videoclips

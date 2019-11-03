@@ -2,10 +2,10 @@ import shutil
 import time
 from os import makedirs, getenv
 
-import aiohttp
 from aiohttp import web
 from aiohttp_session import redis_storage, setup, new_session, get_session
 from aioredis import create_pool
+
 from cjxproject import CJXProject
 
 spool = '/var/spool/conjunx'
