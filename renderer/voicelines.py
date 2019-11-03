@@ -1,4 +1,5 @@
 import csv
+import datetime
 import itertools
 from typing import Dict, List, Tuple
 
@@ -6,7 +7,7 @@ from typing import Dict, List, Tuple
 class VoiceLine:
     __slots__ = ['speech', 'video', 'timestamps', 'next']
 
-    def __init__(self, speech: str, video, timestamps: (float, float), nxt: 'VoiceLine' = None):
+    def __init__(self, speech: str, video, timestamps: (str, str), nxt: 'VoiceLine' = None):
         self.speech = speech
         self.video = video
         self.timestamps = timestamps
@@ -29,7 +30,14 @@ class Transcript:
 
             video = next(r)[0]
 
-            lines = [VoiceLine(l[0], video, (l[1], l[2])) for l in r]
+            lines = []
+
+            for l in r:
+                start = str(datetime.timedelta(seconds=float(l[1])))
+                end = str(datetime.timedelta(seconds=float(l[2])))
+
+                lines.append(VoiceLine(l[0], video, (start, end)))
+
             tagged_lines = {}
 
             for i in range(len(lines)):
@@ -87,12 +95,14 @@ class Collection:
         while i < len(words):
             def growing_search(start: int, end: int) -> Tuple[VoiceLine, int]:
                 term = " ".join(words[start:end])
-                voice_line = self.transcripts.get(term)
+                voice_line_group = self.transcripts.get(term)
 
-                if voice_line is None:
-                    growing_search(start, end + 1)
+                if end > len(words):
+                    raise IndexError("Failed to find needed words!")
+                elif voice_line_group is None:
+                    return growing_search(start, end + 1)
                 else:
-                    return voice_line, end
+                    return voice_line_group[0], end
 
             line, end = growing_search(i, i + 1)
             lines.append(line)

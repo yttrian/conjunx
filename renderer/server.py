@@ -4,6 +4,7 @@ from os import path, makedirs
 
 from aiohttp import web
 
+from render import RenderJob
 from voicelines import Transcript, Collection
 
 spool = '/var/spool/conjunx'
@@ -24,22 +25,25 @@ async def render(request):
     # Get the requested text to convert
     field = await reader.next()
     assert field.name == 'dictate'
-    dictate = await field.read(decode=True)
+    dictate = await field.text()
 
     # Get the data files
     field = await reader.next()
     assert field.name == 'data'
 
-    filename = str(time.time_ns()) + '.cjx'
+    filename = str(time.time_ns()) + '.cjxa'
+    archive_loc = path.join(spool, filename)
 
-    with open(path.join(spool, filename), 'wb') as f:
+    with open(archive_loc, 'wb') as f:
         while True:
             chunk = await field.read_chunk()  # 8192 bytes by default.
             if not chunk:
                 break
             f.write(chunk)
 
-    return web.HTTPOk()
+    job = RenderJob(archive_loc, dictate)
+
+    return web.FileResponse(job.render())
 
 
 @routes.post('/transcript-test')
@@ -57,7 +61,7 @@ async def transcript_test(request):
     c.add_transcript(t)
     d = c.speak(data['dictate'])
 
-    return web.Response(text=str(d))
+    return web.Response(text=str([str(v) for v in d]))
 
 
 async def run():

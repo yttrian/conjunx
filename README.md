@@ -27,3 +27,25 @@ ever,6.332,6.611
 reads,6.606,6.972
 these,6.981,7.395
 ```
+
+## Picking the optimal speech path
+
+Let's say we started with sentences like:
+1. I really like apples
+2. I do not like bananas
+
+And we wanted to say:
+- I really do not like apples
+
+The optimal splice would be:
+- I really [1]
+- do not like [2]
+- apples [1]
+
+Instead of possibly:
+- I [2]
+- really [1]
+- do not [2]
+- like apples[1]
+
+The goal is the find the longest contiguous phrases possible
